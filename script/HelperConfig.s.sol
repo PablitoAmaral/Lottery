@@ -39,10 +39,14 @@ contract HelperConfig is CodeCosntants, Script {
         if (networkConfigs[chainId].vrfCoordinator != address(0)) {
             return networkConfigs[chainId];
         } else if (chainId == LOCAL_CHAIN_ID) {
-            //get or create chain anvil config()
+            return getOrCreateAnvinEthConfig();
         } else {
             revert HelperConfig__InvalidChainID();
         }
+    }
+
+    function getConfig() public returns (NetworkConfig memory) {
+        return getConfigByChainId(block.chainID);
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
@@ -79,6 +83,6 @@ contract HelperConfig is CodeCosntants, Script {
             gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
             callbackGasLimit: 500000, // 500.000 gas
             subscriptionId: 0
-        })
+        });
     }
 }
