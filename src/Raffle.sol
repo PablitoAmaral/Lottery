@@ -11,14 +11,11 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
  * @notice This contract is a simple raffle contract
  * @dev Implements Chainlink VRFv2.5
  */
-
 contract Raffle is VRFConsumerBaseV2Plus {
-
-
     /* Type declarations */
-    enum RaffleState{
-        OPEN,           //0
-        CALCULATING     //1
+    enum RaffleState {
+        OPEN, //0
+        CALCULATING //1
     }
 
     /* State Variables */
@@ -43,8 +40,11 @@ contract Raffle is VRFConsumerBaseV2Plus {
     error Raffle__SendMoreToEnterRaffle();
     error Raffle__TransferFailed();
     error Raffle__RaffleNotOpen();
-    error Raffle__UpkeepNotNeeded(uint256 balance, uint256 playersLenght, uint256 raffleState);
-
+    error Raffle__UpkeepNotNeeded(
+        uint256 balance,
+        uint256 playersLenght,
+        uint256 raffleState
+    );
 
     constructor(
         uint256 _entraceFee,
@@ -61,7 +61,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         i_callbackGasLimit = _callbackGasLimit;
 
         s_lastTimeStamp = block.timestamp;
-        s_RaffleState = RaffleState.OPEN; // same as s_RaffleState = RaffleState(0); 
+        s_RaffleState = RaffleState.OPEN; // same as s_RaffleState = RaffleState(0);
     }
 
     function enterRaffle() external payable {
@@ -70,7 +70,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
             revert Raffle__SendMoreToEnterRaffle();
         }
 
-        if (s_RaffleState != RaffleState.OPEN){
+        if (s_RaffleState != RaffleState.OPEN) {
             revert Raffle__RaffleNotOpen();
         }
         s_players.push(payable(msg.sender));
@@ -88,24 +88,31 @@ contract Raffle is VRFConsumerBaseV2Plus {
      * 4. Implicity, your subscription has LINK
      * @param -igored
      * @return upkeepNeeded true if its time to restart the lottery
-     * @return 
+     * @return
      */
-    function checkUpkeep(bytes memory /* checkData */) public view returns (bool upkeepNeeded, bytes memory /*performData*/ ) {
-        bool timeHasPassed =((block.timestamp - s_lastTimeStamp) >= i_interval);
+    function checkUpkeep(
+        bytes memory /* checkData */
+    ) public view returns (bool upkeepNeeded, bytes memory /*performData*/) {
+        bool timeHasPassed = ((block.timestamp - s_lastTimeStamp) >=
+            i_interval);
         bool isOpen = s_RaffleState == RaffleState.OPEN;
         bool hasBalance = address(this).balance > 0;
         bool hasPlayers = s_players.length > 0;
         upkeepNeeded = timeHasPassed && isOpen && hasBalance && hasPlayers;
         return (upkeepNeeded, "");
-    } 
+    }
 
     function performUpkeep(bytes calldata /* performData */) external {
         if (block.timestamp - s_lastTimeStamp > i_interval) {
             revert();
         }
         (bool upkeepNeeded, ) = checkUpkeep("");
-        if(!upkeepNeeded){
-            revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_RaffleState));
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_RaffleState)
+            );
         }
         s_RaffleState = RaffleState.CALCULATING;
         //get the random number from Chainlink
@@ -142,14 +149,24 @@ contract Raffle is VRFConsumerBaseV2Plus {
         emit winnerPicked(s_recentWinner);
 
         // Interactions (External Contract Interactions)
-        (bool success,) = recentWinner.call{value: address(this).balance}("");
-        if(!success){
+        (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        if (!success) {
             revert Raffle__TransferFailed();
         }
     }
-    /** getters*/
 
+    /**
+     * getters
+     */
     function getEntraceFee() public view returns (uint256) {
         return i_entranceFee;
+    }
+
+    function getRaffleState() public view returns (RaffleState) {
+        return s_RaffleState;
+    }
+
+    function getPlayer(uint256 indexOfPlayer) external view returns (address) {
+        return s_players[indexOfPlayer];
     }
 }

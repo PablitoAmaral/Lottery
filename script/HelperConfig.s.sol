@@ -1,5 +1,6 @@
-// SPDX-License-Identifies: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+
 import {Script} from "forge-std/Script.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
@@ -46,7 +47,7 @@ contract HelperConfig is CodeCosntants, Script {
     }
 
     function getConfig() public returns (NetworkConfig memory) {
-        return getConfigByChainId(block.chainID);
+        return getConfigByChainId(block.chainid);
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
@@ -75,14 +76,15 @@ contract HelperConfig is CodeCosntants, Script {
         );
         vm.stopBroadcast();
 
-        localNetworkconfig = NetworkConfig({
-            entranceFee: 0.01 ether,
-            interval: 30, //30 seconds
-            vrfCoordinator: address(vrfCoordinatorMock),
-            // doesn't matter
-            gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
-            callbackGasLimit: 500000, // 500.000 gas
-            subscriptionId: 0
-        });
+        return
+            localNetworkconfig = NetworkConfig({
+                entranceFee: 0.01 ether,
+                interval: 30, //30 seconds
+                vrfCoordinator: address(vrfCoordinatorMock),
+                // doesn't matter
+                gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
+                callbackGasLimit: 500000, // 500.000 gas
+                subscriptionId: 0
+            });
     }
 }
