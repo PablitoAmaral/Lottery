@@ -1,6 +1,7 @@
 [profile.default]
 remappings = [
     '@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/',
+    '@solmate=lib/solmate/src/',
 ]
 
 src = "src"

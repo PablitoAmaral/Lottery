@@ -3,18 +3,19 @@ pragma solidity ^0.8.0;
 
 import {Script} from "forge-std/Script.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {LinkToken} from "test/mocks/LinkToken.sol";
 
-abstract contract CodeCosntants {
+abstract contract CodeConstants {
     /* VRF Mock Values */
     uint96 public MOCK_BASE_FEE = 0.25 ether;
     uint96 public MOCK_GAS_PRICE_LINK = 1e9;
     /* LINK/ETH price */
     int256 public MOCK_WEI_PER_UNIT_LINK = 4e15;
-    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 1115511;
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
     uint256 public constant LOCAL_CHAIN_ID = 31337;
 }
 
-contract HelperConfig is CodeCosntants, Script {
+contract HelperConfig is CodeConstants, Script {
     error HelperConfig__InvalidChainID();
 
     struct NetworkConfig {
@@ -24,6 +25,7 @@ contract HelperConfig is CodeCosntants, Script {
         bytes32 gasLane;
         uint32 callbackGasLimit;
         uint256 subscriptionId;
+        address link;
     }
 
     NetworkConfig public localNetworkconfig;
@@ -58,7 +60,8 @@ contract HelperConfig is CodeCosntants, Script {
                 vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
                 gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
                 callbackGasLimit: 500000, // 500.000 gas
-                subscriptionId: 0
+                subscriptionId: 38315450914281368443586781166853733332672818900498174174955328833837237447051,
+                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
             });
     }
 
@@ -74,6 +77,7 @@ contract HelperConfig is CodeCosntants, Script {
             MOCK_GAS_PRICE_LINK,
             MOCK_WEI_PER_UNIT_LINK
         );
+        LinkToken linkToken = new LinkToken();
         vm.stopBroadcast();
 
         return
@@ -84,7 +88,8 @@ contract HelperConfig is CodeCosntants, Script {
                 // doesn't matter
                 gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
                 callbackGasLimit: 500000, // 500.000 gas
-                subscriptionId: 0
+                subscriptionId: 0,
+                link: address(linkToken)
             });
     }
 }
