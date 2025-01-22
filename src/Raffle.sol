@@ -19,7 +19,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     }
 
     /* State Variables */
-    uint16 private constant REQUEST_CONFIMATION = 3;
+    uint16 private constant REQUEST_CONFIRMATION = 3;
     uint32 private constant NUM_WORDS = 1;
     uint256 private immutable i_entranceFee;
     uint256 private immutable i_interval;
@@ -33,6 +33,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     RaffleState private s_RaffleState;
 
     /* Events */
+    event RequestedRaffleWinner(uint256 indexed requestId);
     event RaffleEntered(address indexed player);
     event winnerPicked(address indexed winner);
 
@@ -103,9 +104,6 @@ contract Raffle is VRFConsumerBaseV2Plus {
     }
 
     function performUpkeep(bytes calldata /* performData */) external {
-        if (block.timestamp - s_lastTimeStamp > i_interval) {
-            revert();
-        }
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
@@ -121,7 +119,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
             .RandomWordsRequest({
                 keyHash: i_keyHash,
                 subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIMATION,
+                requestConfirmations: REQUEST_CONFIRMATION,
                 callbackGasLimit: i_callbackGasLimit,
                 numWords: NUM_WORDS,
                 extraArgs: VRFV2PlusClient._argsToBytes(
@@ -131,10 +129,12 @@ contract Raffle is VRFConsumerBaseV2Plus {
             });
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(request);
+
+        emit RequestedRaffleWinner(requestId);
     }
 
     function fulfillRandomWords(
-        uint256 requestId,
+        uint256 /*requestId */,
         uint256[] calldata randomWords
     ) internal override {
         //check
